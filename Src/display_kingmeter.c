@@ -170,6 +170,7 @@ void KingMeter_Init (KINGMETER_t* KM_ctx)
     KM_ctx->Settings.SPS_SpdMagnets         = (uint8_t) wheel_magnets;
     KM_ctx->Settings.VOL_1_UnderVolt_x10    = (uint16_t) (vcutoff * 10);
     KM_ctx->Settings.WheelSize_mm           = (uint16_t) (WHEEL_CIRCUMFERENCE * 1000);
+    KM_ctx->Settings.Reverse   	 		 	= 1; //workaround for reverse operation
 
     // Parameters received from display in operation mode:
 
@@ -200,7 +201,7 @@ void KingMeter_Init (KINGMETER_t* KM_ctx)
 
 #if (DISPLAY_TYPE == DISPLAY_TYPE_KINGMETER_618U)
     //Start UART with DMA
-    if (HAL_UART_Receive_DMA(&huart1, (uint8_t *)KM_ctx->RxBuff, KM_MAX_RXBUFF) != HAL_OK)
+    if (HAL_UART_Receive_DMA(&huart1, (uint8_t *)KM_ctx->RxBuff, 6) != HAL_OK)
      {
  	   Error_Handler();
      }
@@ -248,12 +249,12 @@ static void KM_618U_Service(KINGMETER_t* KM_ctx)
     uint8_t  i;
     static uint8_t TxBuffer[KM_MAX_TXBUFF];
     KM_ctx->RxState = RXSTATE_SENDTXMSG;
+    kingmeter_update();
 
 // Send message to display
 
 
-    if(KM_ctx->RxState == RXSTATE_SENDTXMSG)
-    {
+
         KM_ctx->RxState = RXSTATE_MSGBODY;
 
         // Prepare Tx message
@@ -286,43 +287,35 @@ static void KM_618U_Service(KINGMETER_t* KM_ctx)
             TxBuffer[7] = TxBuffer[7] ^ TxBuffer[i];                          // Calculate XOR CheckSum
         }
 
-     //   KM_ctx->SerialPort->write(TxBuffer[7]);                           // Send XOR CheckSum
+        // Buffer ueber DMA senden
+        HAL_UART_Transmit_DMA(&huart1, (uint8_t *)&TxBuffer, KM_MAX_TXBUFF);
 
 
 
-    }
+
 
 
     // Receive Message body
-    if(KM_ctx->RxState == RXSTATE_MSGBODY)
-    {
+
 
                 // Verify XOR CheckSum
                 if(KM_ctx->RxBuff[4] == (KM_ctx->RxBuff[1] ^ KM_ctx->RxBuff[2] ^ KM_ctx->RxBuff[3]))
                 {
-                    KM_ctx->RxState = RXSTATE_DONE;
-                }
-                else
-                {
-                    KM_ctx->RxState = RXSTATE_STARTCODE;
-                }
 
 
 
-    }
 
-    // Message received completely
-    if(KM_ctx->RxState == RXSTATE_DONE)
-    {
 
-        // Buffer ueber DMA senden
-        HAL_UART_Transmit_DMA(&huart1, (uint8_t *)&TxBuffer, KM_MAX_TXBUFF);
-       // HAL_Delay(6);
+
+
+
 
         KM_ctx->RxState = RXSTATE_STARTCODE;
 
         // Decode PAS level - Display sets PAS-level to 0 when overspeed detected!
         KM_ctx->Rx.AssistLevel = KM_ctx->RxBuff[1] & 0x07;
+
+       if(KM_ctx->Rx.AssistLevel==7)KM_ctx->Rx.AssistLevel=0; //Display send a 7 when showing 0
 
         // Decode Headlight status
         KM_ctx->Rx.Headlight = (KM_ctx->RxBuff[1] & 0x80) >> 7;         // KM_HEADLIGHT_OFF / KM_HEADLIGHT_ON
@@ -344,7 +337,10 @@ static void KM_618U_Service(KINGMETER_t* KM_ctx)
         KM_ctx->Settings.WheelSize_mm = KM_WHEELSIZE[KM_ctx->RxBuff[2] & 0x07];
 
 //      KM_ctx->Rx.CUR_Limit_x10;
-    }
+                }
+                else HAL_GPIO_TogglePin(LIGHT_GPIO_Port, LIGHT_Pin);
+
+
 }
 #endif
 

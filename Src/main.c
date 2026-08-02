@@ -615,6 +615,7 @@ int main(void)
 	  //display message processing
 	  if(ui8_UART1_flag){
 #if (DISPLAY_TYPE & DISPLAY_TYPE_KINGMETER || DISPLAY_TYPE & DISPLAY_TYPE_DEBUG)
+
 		  KingMeter_Service(&KM);
 #endif
 
@@ -647,7 +648,7 @@ int main(void)
 	  if(ui8_adc_regular_flag){
 		ui32_throttle_cumulated -= ui32_throttle_cumulated>>4;
 	#ifdef TQONAD1
-		ui32_throttle_cumulated += adcData[6]; //get value from AD1 PB1
+		ui32_throttle_cumulated += adcData[5]; //get value from AD1 PA4
 	#else
 		ui32_throttle_cumulated += adcData[1]; //get value from SP
 	#endif
@@ -798,6 +799,12 @@ int main(void)
 				if(uint32_PAS_counter>PAS_TIMEOUT)int32_temp_current_target=0;
 				else int32_temp_current_target = uint16_mapped_PAS;
 #endif
+
+#if (DISPLAY_TYPE == DISPLAY_TYPE_KINGMETER_618U)
+				uint16_mapped_PAS = map(uint32_PAS, RAMP_END, PAS_TIMEOUT, ((PH_CURRENT_MAX*(int32_t)(MS.assist_level)))/5, 0); // level in range 0...255
+				if(uint32_PAS_counter>PAS_TIMEOUT)int32_temp_current_target=0;
+				else int32_temp_current_target = uint16_mapped_PAS;
+#endif
 #if (DISPLAY_TYPE == DISPLAY_TYPE_DEBUG)
 				uint16_mapped_PAS = map(uint32_PAS, RAMP_END, PAS_TIMEOUT, PH_CURRENT_MAX, 0); // Full amps in debug mode
 				if(uint32_PAS_counter>PAS_TIMEOUT)int32_temp_current_target=0;
@@ -827,7 +834,7 @@ int main(void)
 #endif // end RIDEMODE_BB_TORQUESENSOR
 
 #ifdef THROTTLE_OVERRIDE
-					uint16_mapped_throttle = map(ui16_throttle, THROTTLE_OFFSET, THROTTLE_MAX, 0,PH_CURRENT_MAX);
+					uint16_mapped_throttle = map(adcData[5], THROTTLE_OFFSET, THROTTLE_MAX, 0,PH_CURRENT_MAX);
 					if(uint16_mapped_throttle>int32_temp_current_target)int32_temp_current_target=uint16_mapped_throttle;
 #endif
 				}
@@ -940,8 +947,8 @@ int main(void)
 		//  sprintf_(buffer, "%d, %d, %d, %d, %d, %d\r\n", hubdata.HS_Overtemperature, hubdata.HS_Pedalposition, hubdata.HS_Pedals_turning, hubdata.HS_Torque, hubdata.HS_Wheel_turning, hubdata.HS_Wheeltime );
 
 		 sprintf_(buffer, "%d, %d, %d, %d, %d, %d, %d, %d, %d\r\n",
-				 hubdata.HS_Pedalposition,
-				 hubdata.HS_Torque,
+				 adcData[5],
+				 MS.Voltage,
 				 uint16_mapped_throttle,
 				 MS.i_q_setpoint,
 				 (adcData[0]*CAL_V)>>1,
@@ -949,7 +956,7 @@ int main(void)
 				// (uint32_battery_current_cumulated>>4)*28,
 				// (q31_t_Battery_Current_accumulated>>8)*i8_direction*i8_reverse_flag,
 				 uint32_SPEEDx100_cumulated>>SPEEDFILTER,
-				 MS.Battery_Current,
+				 uint32_PAS,
 				 MS.Cadence);
 		 // sprintf_(buffer, "%d, %d, %d, %d, %d, %d, %d\r\n",(uint16_t)adcData[0],(uint16_t)adcData[1],(uint16_t)adcData[2],(uint16_t)adcData[3],(uint16_t)(adcData[4]),(uint16_t)(adcData[5]),(uint16_t)(adcData[6])) ;
 		 // sprintf_(buffer, "%d, %d, %d, %d, %d, %d\r\n",tic_array[0],tic_array[1],tic_array[2],tic_array[3],tic_array[4],tic_array[5]) ;
@@ -1972,7 +1979,7 @@ void kingmeter_update(void)
 
     /* Receive Rx parameters/settings and send Tx parameters */
 #if (DISPLAY_TYPE == DISPLAY_TYPE_KINGMETER_618U)
-	  KingMeter_Service(&KM);
+	  //KingMeter_Service(&KM);
 #endif
 
 

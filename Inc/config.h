@@ -69,17 +69,17 @@
 #define FRAC_HIGH 30
 #define FRAC_LOW 15
 #define TS_COEF 6 			//12 for Kclamber Sensor 1200 for T15 BB sensor
-#define RIDEMODE RIDEMODE_KCLAMBER_KASSETTE_SENSOR
-//#define TQONAD1
+#define RIDEMODE RIDEMODE_PAS
+#define TQONAD1
 
 //------------------------------Throttle settings
-#define THROTTLE_OFFSET 900
+#define THROTTLE_OFFSET 15
 #define THROTTLE_MAX 2600
 #define THROTTLE_OVERRIDE
 
 //-------------------------------Speed settings
 #define WHEEL_CIRCUMFERENCE 2200
-#define GEAR_RATIO 100 //dummy for testing
+#define GEAR_RATIO 11 //dummy for testing
 #define SPEEDLIMIT 25
 #define PULSES_PER_REVOLUTION 1
 #define REVERSE -1
@@ -95,12 +95,12 @@
 //#define ADC_BRAKE
 #define REGEN_CURRENT 0
 #define REGEN_CURRENT_MAX 10000
-#define PUSHASSIST_CURRENT 30
-#define VOLTAGE_MIN 1200
+#define PUSHASSIST_CURRENT 60
+#define VOLTAGE_MIN 1900 //32V
 
 //----------------------------- Display setting
 
-#define DISPLAY_TYPE DISPLAY_TYPE_DEBUG
+#define DISPLAY_TYPE DISPLAY_TYPE_KINGMETER_618U
 
 //------------------------------Autodetect setting
 #define AUTODETECT 0

@@ -104,7 +104,7 @@ uint8_t ui8_hall_state=0;
 uint8_t ui8_hall_state_old=0;
 uint8_t ui8_hall_case =0;
 uint16_t ui16_tim2_recent=0;
-uint16_t ui16_timertics=5000; 					//timertics between two hall events for 60Â° interpolation
+uint16_t ui16_timertics=5000; 					//timertics between two hall events for 60Ã‚Â° interpolation
 uint16_t ui16_throttle;
 uint16_t ui16_brake_adc;
 uint32_t ui32_throttle_cumulated;
@@ -196,7 +196,7 @@ uint16_t switchtime[3];
 volatile uint16_t adcData[8]; //Buffer for ADC1 Input
 q31_t tic_array[6];
 
-//Rotor angle scaled from degree to q31 for arm_math. -180Â°-->-2^31, 0Â°-->0, +180Â°-->+2^31
+//Rotor angle scaled from degree to q31 for arm_math. -180Ã‚Â°-->-2^31, 0Ã‚Â°-->0, +180Ã‚Â°-->+2^31
 const q31_t deg_30 = 357913941;
 
 q31_t Hall_13 = 0;
@@ -822,7 +822,7 @@ int main(void)
 #endif //end RIDEMODE_PAS
 #if (RIDEMODE == RIDEMODE_BB_TORQUESENSOR)
 				//calculate current target form torque, cadence and assist level
-				int32_temp_current_target = (TS_COEF*(int32_t)(MS.assist_level)* (uint32_torque_cumulated>>5)/uint32_PAS)>>8; //>>5 aus Mittelung �ber eine Kurbelumdrehung, >>8 aus KM5S-Protokoll Assistlevel 0..255
+				int32_temp_current_target = (TS_COEF*(int32_t)(MS.assist_level)* (uint32_torque_cumulated>>5)/uint32_PAS)>>8; //>>5 aus Mittelung über eine Kurbelumdrehung, >>8 aus KM5S-Protokoll Assistlevel 0..255
 				temp5=int32_temp_current_target;
 				//limit current target to max value
 				if(int32_temp_current_target>PH_CURRENT_MAX) int32_temp_current_target = PH_CURRENT_MAX;
@@ -1083,7 +1083,7 @@ static void MX_ADC1_Init(void)
     /**Common config 
     */
   hadc1.Instance = ADC1;
-  hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE; //Scan muÃ fÃ¼r getriggerte Wandlung gesetzt sein
+  hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE; //Scan muÃƒÂŸ fÃƒÂ¼r getriggerte Wandlung gesetzt sein
   hadc1.Init.ContinuousConvMode = DISABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T3_TRGO;// Trigger regular ADC with timer 3 ADC_EXTERNALTRIGCONV_T1_CC1;// // ADC_SOFTWARE_START; //
@@ -1112,10 +1112,10 @@ static void MX_ADC1_Init(void)
   sConfigInjected.InjectedNbrOfConversion = 1;
   sConfigInjected.InjectedSamplingTime = ADC_SAMPLETIME_1CYCLE_5;
   sConfigInjected.ExternalTrigInjecConv = ADC_EXTERNALTRIGINJECCONV_T1_CC4; // Hier bin ich nicht sicher ob Trigger out oder direkt CC4
-  sConfigInjected.AutoInjectedConv = DISABLE; //muÃ aus sein
+  sConfigInjected.AutoInjectedConv = DISABLE; //muÃƒÂŸ aus sein
   sConfigInjected.InjectedDiscontinuousConvMode = DISABLE;
   sConfigInjected.InjectedOffset = ui16_ph1_offset;//1900;
-  HAL_ADC_Stop(&hadc1); //ADC muÃ gestoppt sein, damit Triggerquelle gesetzt werden kann.
+  HAL_ADC_Stop(&hadc1); //ADC muÃƒÂŸ gestoppt sein, damit Triggerquelle gesetzt werden kann.
   if (HAL_ADCEx_InjectedConfigChannel(&hadc1, &sConfigInjected) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -2100,19 +2100,19 @@ int32_t map (int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t
 //assuming, a proper AD conversion takes 350 timer tics, to be confirmed. DT+TR+TS deadtime + noise subsiding + sample time
 void dyn_adc_state(q31_t angle){
 	if (switchtime[2]>switchtime[0] && switchtime[2]>switchtime[1]){
-		MS.char_dyn_adc_state = 1; // -90Â° .. +30Â°: Phase C at high dutycycles
+		MS.char_dyn_adc_state = 1; // -90Ã‚Â° .. +30Ã‚Â°: Phase C at high dutycycles
 		if(switchtime[2]>1500)TIM1->CCR4 =  switchtime[2]-TRIGGER_OFFSET_ADC;
 		else TIM1->CCR4 = TRIGGER_DEFAULT;
 	}
 
 	if (switchtime[0]>switchtime[1] && switchtime[0]>switchtime[2]) {
-		MS.char_dyn_adc_state = 2; // +30Â° .. 150Â° Phase A at high dutycycles
+		MS.char_dyn_adc_state = 2; // +30Ã‚Â° .. 150Ã‚Â° Phase A at high dutycycles
 		if(switchtime[0]>1500)TIM1->CCR4 =  switchtime[0]-TRIGGER_OFFSET_ADC;
 		else TIM1->CCR4 = TRIGGER_DEFAULT;
 	}
 
 	if (switchtime[1]>switchtime[0] && switchtime[1]>switchtime[2]){
-		MS.char_dyn_adc_state = 3; // +150 .. -90Â° Phase B at high dutycycles
+		MS.char_dyn_adc_state = 3; // +150 .. -90Ã‚Â° Phase B at high dutycycles
 		if(switchtime[1]>1500)TIM1->CCR4 =  switchtime[1]-TRIGGER_OFFSET_ADC;
 		else TIM1->CCR4 = TRIGGER_DEFAULT;
 	}
@@ -2253,25 +2253,26 @@ void autodetect() {
     MS.u_q=0;
     MS.i_d_setpoint= 0;
     uint32_tics_filtered=1000000;
-
-	HAL_FLASH_Unlock();
-
-	if (i8_recent_rotor_direction == 1) {
-		EE_WriteVariable(EEPROM_POS_HALL_ORDER, 1);
-		i16_hall_order = 1;
-	} else {
-		EE_WriteVariable(EEPROM_POS_HALL_ORDER, -1);
-		i16_hall_order = -1;
+	//write to EEPROM only, if angle was detected
+	if(Hall_45){
+		HAL_FLASH_Unlock();
+	
+		if (i8_recent_rotor_direction == 1) {
+			EE_WriteVariable(EEPROM_POS_HALL_ORDER, 1);
+			i16_hall_order = 1;
+		} else {
+			EE_WriteVariable(EEPROM_POS_HALL_ORDER, -1);
+			i16_hall_order = -1;
+		}
+		EE_WriteVariable(EEPROM_POS_HALL_45, Hall_45 >> 16);
+		EE_WriteVariable(EEPROM_POS_HALL_51, Hall_51 >> 16);
+		EE_WriteVariable(EEPROM_POS_HALL_13, Hall_13 >> 16);
+		EE_WriteVariable(EEPROM_POS_HALL_32, Hall_32 >> 16);
+		EE_WriteVariable(EEPROM_POS_HALL_26, Hall_26 >> 16);
+		EE_WriteVariable(EEPROM_POS_HALL_64, Hall_64 >> 16);
+	
+		HAL_FLASH_Lock();
 	}
-	EE_WriteVariable(EEPROM_POS_HALL_45, Hall_45 >> 16);
-	EE_WriteVariable(EEPROM_POS_HALL_51, Hall_51 >> 16);
-	EE_WriteVariable(EEPROM_POS_HALL_13, Hall_13 >> 16);
-	EE_WriteVariable(EEPROM_POS_HALL_32, Hall_32 >> 16);
-	EE_WriteVariable(EEPROM_POS_HALL_26, Hall_26 >> 16);
-	EE_WriteVariable(EEPROM_POS_HALL_64, Hall_64 >> 16);
-
-	HAL_FLASH_Lock();
-
 	MS.hall_angle_detect_flag = 1;
 #if (DISPLAY_TYPE == DISPLAY_TYPE_DEBUG)
 
@@ -2421,7 +2422,7 @@ q31_t speed_PLL (q31_t ist, q31_t soll, uint8_t speedadapt)
   }
 
 #if (R_TEMP_PULLUP)
-int16_t T_NTC(uint16_t ADC) // ADC 12 Bit, 10k Pullup, Rückgabewert in °C
+int16_t T_NTC(uint16_t ADC) // ADC 12 Bit, 10k Pullup, RÃ¼ckgabewert in Â°C
 
 {
     uint16_t Ux1000 = 3300;
@@ -2434,8 +2435,8 @@ int16_t T_NTC(uint16_t ADC) // ADC 12 Bit, 10k Pullup, Rückgabewert in °C
      uint16_t n = 0;
      while(R >> n > 1) n++;
      	R <<= 13;
-     	for(n <<= 6; R >> (n >> 6) >> 13; n++) R -= (R >> 10)*11; // Annäherung 1-11/1024 für 2^(-1/64)
-        int16_t T6 = 2160580/(n+357)-1639; // Berechnung für 10 kOhm-NTC (bei 25 °C) mit beta=3900 K
+     	for(n <<= 6; R >> (n >> 6) >> 13; n++) R -= (R >> 10)*11; // AnnÃ¤herung 1-11/1024 fÃ¼r 2^(-1/64)
+        int16_t T6 = 2160580/(n+357)-1639; // Berechnung fÃ¼r 10 kOhm-NTC (bei 25 Â°C) mit beta=3900 K
         return (T6 > 0 ? T6+3 : T6-2)/6; // Rundung
 
 }
